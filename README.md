@@ -14,7 +14,7 @@ This project uses Python, Django, SQLite, GitHub, and HTML.
 ### Clone the Repository
 Clone the project repository to your computer:
 
-git clone <repository-url>
+git clone https://github.com/Geek-Squad-Capstone/northstar-helpdesk.git
 
 Then move into the project folder:
 
