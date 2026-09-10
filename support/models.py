@@ -5,7 +5,7 @@ from django.contrib.auth.models import User
 class UserProfile(models.Model):
 
     role_options = [
-        ("employee", "Employee"),
+        ("regular_user", "Regular User"),
         ("technician", "IT Technician"),
         ("administrator", "IT Administrator"),
     ]
@@ -19,7 +19,7 @@ class UserProfile(models.Model):
     role = models.CharField(
         max_length=20,
         choices=role_options,
-        default="employee"
+        default="regular_user"
     )
 
     def __str__(self):
