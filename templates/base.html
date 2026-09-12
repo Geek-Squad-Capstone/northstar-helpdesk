@@ -7,6 +7,15 @@
     <link rel="stylesheet" href="{% static 'css/styles.css' %}">
 </head>
 <body>
+    {% if user.is_authenticated %}
+        <p>Welcome, {{ user.username }}! </p>           
+            <form method="post" action="{% url 'logout' %}">
+                {% csrf_token %}
+                <button type="submit">Logout</button>
+            </form>
+    {% else %}
+        <p><a href="{% url 'login' %}">Login</a></p>
+    {% endif %}
     {% block content %}
     {% endblock %}
 </body>
