@@ -7,6 +7,13 @@
     <link rel="stylesheet" href="{% static 'css/styles.css' %}">
 </head>
 <body>
+    <nav>
+        <ul>
+            <li><a href="{% url 'home' %}">Home</a></li>
+            <li><a href="{% url 'dashboard' %}">Dashboard</a></li>
+            <li><a href="{% url 'tickets' %}">Tickets</a></li>
+        </ul>
+    </nav>
     {% if user.is_authenticated %}
         <p>Welcome, {{ user.username }}! </p>           
             <form method="post" action="{% url 'logout' %}">
