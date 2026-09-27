@@ -85,6 +85,37 @@ class Ticket(models.Model):
         blank=True
     )
 
+    def change_status(self,user, new_status):
+        old_status = self.status
+        self.status = new_status
+        self.save()
+
+        AuditLog.objects.create(
+            user=user,
+            ticket=self,
+            action=f"Status changed from {old_status} to {new_status}"
+	)
+
+    def assign_ticket(self, user, technician):
+        self.assigned_technician = technician
+        self.save()
+	
+        AuditLog.objects.create(
+            user=user,
+            ticket=self,
+            action=f"Ticket assigned to {technician.username}"
+        )
+
+    def close_ticket(self, user):
+        self.status = "Closed"
+        self.save()
+
+        AuditLog.objects.create(
+            user=user,  
+            ticket=self,
+            action=f"Ticket closed"
+        )
+
     def __str__(self):
         return self.title
 
