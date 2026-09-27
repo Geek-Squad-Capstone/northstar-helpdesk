@@ -1,9 +1,28 @@
+{% load static %}
+
 <!DOCTYPE html>
 <html>
 <head>
     <title>NorthStar Helpdesk</title>
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
 </head>
 <body>
+    <nav>
+        <ul>
+            <li><a href="{% url 'home' %}">Home</a></li>
+            <li><a href="{% url 'dashboard' %}">Dashboard</a></li>
+            <li><a href="{% url 'tickets' %}">Tickets</a></li>
+        </ul>
+    </nav>
+    {% if user.is_authenticated %}
+        <p>Welcome, {{ user.username }}! </p>           
+            <form method="post" action="{% url 'logout' %}">
+                {% csrf_token %}
+                <button type="submit">Logout</button>
+            </form>
+    {% else %}
+        <p><a href="{% url 'login' %}">Login</a></p>
+    {% endif %}
     {% block content %}
     {% endblock %}
 </body>
