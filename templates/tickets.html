@@ -1,5 +1,28 @@
 {% extends 'base.html' %}
 {% block content %}
-    <h1>Tickets</h1>
-    <p>Helpdesk Tickets</p>
+    <h1>My Tickets</h1>
+
+        {% if tickets %}
+
+            {% for ticket in tickets %}
+
+               <div>
+                <h3>{{ ticket.title }}</h3>
+
+                <p>Status: {{ ticket.status }}</p>
+                <p>Priority: {{ ticket.priority }}</p>
+                <p>Department: {{ ticket.department }}</p>
+                <p>Created: {{ ticket.created_date }}</p>
+              </div>
+
+              <hr>
+            {% endfor %}
+
+      {% else %}
+
+        <p>You have not submitted any tickets yet.</p>
+
+      {% endif %}
+
+    
 {% endblock %}
