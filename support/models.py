@@ -36,6 +36,30 @@ class Category(models.Model):
 
 class Ticket(models.Model):
 
+    device_choices = [
+        ("Desktop", "Desktop"),
+        ("Laptop", "Laptop"),
+        ("Mobile Device", "Mobile Device"),
+        ("Printer", "Printer"),
+        ("Network", "Network"),
+        ("Software/Application", "Software/Application"),
+        ("Other", "Other"),
+    ]
+
+    priority_choices = [
+        ("Low", "Low"),
+        ("Medium", "Medium"),
+        ("High", "High"),
+        ("Critical", "Critical"),
+    ]
+
+    department_choices = [
+        ("IT", "IT"),
+        ("Human Resources", "Human Resources"),
+        ("Finance", "Finance"),
+        ("Operations", "Operations"),
+    ]
+
     submitted_by = models.ForeignKey(
         User,
         on_delete=models.PROTECT,
@@ -58,7 +82,10 @@ class Ticket(models.Model):
 
     title = models.CharField(max_length=200)
 
-    affected_device_system = models.CharField(max_length=200)
+    affected_device_system = models.CharField(
+        max_length=200,
+        choices = device_choices
+    )
 
     description = models.TextField()
 
@@ -67,9 +94,15 @@ class Ticket(models.Model):
         default="Open"
     )
 
-    priority = models.CharField(max_length=20)
+    priority = models.CharField(
+        max_length=20,
+        choices = priority_choices
+    )
 
-    department = models.CharField(max_length=100)
+    department = models.CharField(
+        max_length=100,
+        choices = department_choices
+    )
 
     created_date = models.DateTimeField(auto_now_add=True)
 
