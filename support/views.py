@@ -4,6 +4,9 @@ from .models import Ticket
 from .permissions import role_required
 from .forms import TicketForm
 from django.contrib import messages
+from django.shortcuts import get_object_or_404
+from .models import UserProfile
+
 
 #  Create your views here.
 def index(request):
@@ -51,4 +54,40 @@ def ticket_queue(request):
         request,
         "ticket_queue.html",
         {"tickets": tickets}
+    )
+
+@role_required("administrator")
+def assign_technician(request, ticket_id):
+    ticket = get_object_or_404(Ticket, id=ticket_id)
+
+    if request.method == "POST":
+        technician_id = request.POST.get("technician")
+
+        technician = get_object_or_404(
+            UserProfile,
+            user_id=technician_id,
+            role="technician"
+        )
+
+        ticket.assigned_technician = technician.user
+        ticket.save()
+
+        messages.success(
+            request,
+            f"Ticket {ticket.id} has been assigned to {technician.user.username}."
+        )
+
+        return redirect("ticket_queue")
+
+    technicians = UserProfile.objects.filter(
+        role="technician"
+    ).select_related("user")
+
+    return render(
+        request,
+        "tickets/assign_technician.html",
+        {
+            "ticket": ticket,
+            "technicians": technicians,
+        }
     )
