@@ -17,3 +17,14 @@ def tickets(request):
 
     return render(request, 'tickets.html', {'tickets': tickets})
     
+@role_required("technician", "administrator")
+def ticket_queue(request):
+    tickets = Ticket.objects.exclude(
+        status="Closed"
+    ).order_by("-created_date")
+
+    return render(
+        request,
+        "ticket_queue.html",
+        {"tickets": tickets}
+    )
