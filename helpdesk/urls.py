@@ -26,4 +26,6 @@ urlpatterns = [
     path('tickets/create/', views.create_ticket, name='create_ticket'),
     path('accounts/', include('django.contrib.auth.urls')),
     path("ticket/queue/",views.ticket_queue,name="ticket_queue"),
+    path("categories/",views.category_management,name="category_management"),
+    path("categories/<int:category_id>/toggle/", views.toggle_category_status, name="toggle_category_status"),
 ]
