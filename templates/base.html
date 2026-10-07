@@ -11,7 +11,13 @@
         <ul>
             <li><a href="{% url 'home' %}">Home</a></li>
             <li><a href="{% url 'dashboard' %}">Dashboard</a></li>
-            <li><a href="{% url 'tickets' %}">Tickets</a></li>
+            <li><a href="{% url 'tickets' %}">My Tickets</a></li>
+
+            {% if user.is_authenticated %}
+              {% if user.profile.role == "technician" or user.profile.role == "administrator" %}
+                <li><a href="{% url 'ticket_queue' %}">Ticket Queue</a></li>
+              {% endif %}
+            {% endif %}
         </ul>
     </nav>
     {% if user.is_authenticated %}

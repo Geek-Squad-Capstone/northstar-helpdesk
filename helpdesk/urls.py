@@ -25,4 +25,5 @@ urlpatterns = [
     path('tickets/', views.tickets, name='tickets'),
     path('tickets/create/', views.create_ticket, name='create_ticket'),
     path('accounts/', include('django.contrib.auth.urls')),
+    path("ticket/queue/",views.ticket_queue,name="ticket_queue"),
 ]

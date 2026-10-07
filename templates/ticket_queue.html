@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <h1>Ticket Queue</h1>
+
+    {% for ticket in tickets %}
+        <div>
+            <h3>{{ ticket.title }}</h3>
+            <p>Status: {{ ticket.status }}</p>
+            <p>Priority: {{ ticket.priority }}</p>
+            <p>Category: {{ ticket.category }}</p>
+            <p>Submitted by: {{ ticket.submitted_by }}</p>
+            <p>Created: {{ ticket.created_date }}</p>
+        </div>
+    {% empty %}
+        <p>No tickets are currently in the queue.</p>
+    {% endfor %}
+{% endblock %}
