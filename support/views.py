@@ -1,8 +1,8 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
-from .models import Ticket
+from .models import Ticket, UserProfile, Category 
 from .permissions import role_required
-from .forms import TicketForm
+from .forms import TicketForm, CategoryForm
 from django.contrib import messages
 from django.shortcuts import get_object_or_404
 from .models import UserProfile
@@ -91,3 +91,36 @@ def assign_technician(request, ticket_id):
             "technicians": technicians,
         }
     )
+
+@role_required("administrator")
+def category_management(request):
+    if request.method == "POST":
+        form = CategoryForm(request.POST)
+
+        if form.is_valid():
+            form.save()
+            return redirect("category_management")
+    else:
+        form = CategoryForm()
+
+    categories = Category.objects.all().order_by("category_name")
+
+    return render(
+        request,
+        "category_management.html",
+        {
+            "form": form,
+            "categories": categories,
+        }
+    )
+
+
+@role_required("administrator")
+def toggle_category_status(request, category_id):
+    category = get_object_or_404(Category, id=category_id)
+
+    if request.method == "POST":
+        category.category_status = not category.category_status
+        category.save()
+
+    return redirect("category_management")
