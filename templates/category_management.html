@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<h1>Category Management</h1>
+
+<h2>Add Category</h2>
+
+<form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Add Category</button>
+</form>
+
+<h2>Existing Categories</h2>
+
+<ul>
+    {% for category in categories %}
+        <li>
+            {{ category.category_name }}
+
+            {% if category.category_status %}
+                - Active
+            {% else %}
+                - Inactive
+            {% endif %}
+
+            <form
+                method="post"
+                action="{% url 'toggle_category_status' category.id %}"
+                style="display: inline;"
+            >
+                {% csrf_token %}
+
+                {% if category.category_status %}
+                    <button type="submit">Deactivate</button>
+                {% else %}
+                    <button type="submit">Activate</button>
+                {% endif %}
+            </form>
+        </li>
+    {% empty %}
+        <li>No categories have been created.</li>
+    {% endfor %}
+</ul>
+
+{% endblock %}
