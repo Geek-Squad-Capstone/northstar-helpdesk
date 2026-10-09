@@ -10,13 +10,21 @@
     <nav>
         <ul>
             <li><a href="{% url 'home' %}">Home</a></li>
-            <li><a href="{% url 'dashboard' %}">Dashboard</a></li>
-            <li><a href="{% url 'tickets' %}">My Tickets</a></li>
-
+            
             {% if user.is_authenticated %}
-              {% if user.profile.role == "technician" or user.profile.role == "administrator" %}
-                <li><a href="{% url 'ticket_queue' %}">Ticket Queue</a></li>
-              {% endif %}
+                <li><a href="{% url 'dashboard' %}">Dashboard</a></li>
+                {% if user.profile.role == "regular_user" or user.profile.role == "administrator" %}
+                    <li><a href="{% url 'create_ticket' %}">Create Ticket</a></li>
+                    <li><a href="{% url 'tickets' %}">My Tickets</a></li>
+                {% endif %}
+
+                {% if user.profile.role == "technician" or user.profile.role == "administrator" %}
+                    <li><a href="{% url 'ticket_queue' %}">Ticket Queue</a></li>
+                {% endif %}
+
+                {% if user.profile.role == "administrator" %}
+                    <li><a href="{% url 'category_management' %}">Category Management</a></li>
+                {% endif %}
             {% endif %}
         </ul>
     </nav>

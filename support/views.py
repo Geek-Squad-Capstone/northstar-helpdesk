@@ -38,7 +38,7 @@ def create_ticket(request):
 
     return render(request, "create_ticket.html", {"form": form})
 
-@role_required("regular_user")
+@role_required("regular_user", "administrator")
 def tickets(request):
     tickets = Ticket.objects.filter(submitted_by=request.user).order_by("-created_date")
 
