@@ -9,8 +9,26 @@
             <p>Status: {{ ticket.status }}</p>
             <p>Priority: {{ ticket.priority }}</p>
             <p>Category: {{ ticket.category }}</p>
+            <p>Affected device/system: {{ ticket.affected_device_system }}</p>
+            <p>Description: {{ ticket.description }}</p>
             <p>Submitted by: {{ ticket.submitted_by }}</p>
             <p>Created: {{ ticket.created_date }}</p>
+            <p>Assigned to:
+                {% if ticket.assigned_technician %}
+                    {{ ticket.assigned_technician.username }}
+                {% else %}
+                    Unassigned
+                {% endif %}
+            </p>
+
+            {% if user.profile.role == "technician" %}
+                {% if not ticket.assigned_technician %}
+                    <form method="post" action="{% url 'claim_ticket' ticket.id %}">
+                        {% csrf_token %}
+                        <button type="submit">Claim Ticket</button>
+                    </form>
+                {% endif %}
+            {% endif %}
         </div>
     {% empty %}
         <p>No tickets are currently in the queue.</p>

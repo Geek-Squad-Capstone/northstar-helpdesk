@@ -4,8 +4,6 @@ from .models import Ticket, UserProfile, Category
 from .permissions import role_required
 from .forms import TicketForm, CategoryForm
 from django.contrib import messages
-from django.shortcuts import get_object_or_404
-from .models import UserProfile
 
 
 #  Create your views here.
@@ -55,6 +53,32 @@ def ticket_queue(request):
         "ticket_queue.html",
         {"tickets": tickets}
     )
+
+@role_required("technician")
+def claim_ticket(request, ticket_id):
+    ticket = get_object_or_404(Ticket, id=ticket_id)
+
+    if request.method != "POST":
+        return redirect("ticket_queue")
+
+    if ticket.assigned_technician is not None:
+        messages.error(
+            request,
+            "This ticket has already been assigned."
+        )
+        return redirect("ticket_queue")
+
+    ticket.assign_ticket(
+        user=request.user,
+        technician=request.user
+    )
+
+    messages.success(
+        request,
+        f"Ticket {ticket.id} has been assigned to you."
+    )
+
+    return redirect("ticket_queue")
 
 @role_required("administrator")
 def assign_technician(request, ticket_id):
