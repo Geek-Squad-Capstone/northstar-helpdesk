@@ -29,4 +29,5 @@ urlpatterns = [
     path("ticket/queue/",views.ticket_queue,name="ticket_queue"),
     path("categories/",views.category_management,name="category_management"),
     path("categories/<int:category_id>/toggle/",views.toggle_category_status,name="toggle_category_status"),
+    path("tickets/<int:ticket_id>/claim/",views.claim_ticket,name="claim_ticket"),
 ]
