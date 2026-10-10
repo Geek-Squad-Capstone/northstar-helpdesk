@@ -20,6 +20,9 @@
                     Unassigned
                 {% endif %}
             </p>
+                {% if user.profile.role == "administrator" and ticket.long_unassigned %}
+                    <p><span style="color: red;"><strong>⚠ Unassigned for more than 24 hours</strong></span></p>
+                {% endif %}
 
             {% if user.profile.role == "technician" %}
                 {% if not ticket.assigned_technician %}

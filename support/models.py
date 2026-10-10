@@ -1,5 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
+from datetime import timedelta
+from django.utils import timezone
 
 
 class UserProfile(models.Model):
@@ -117,6 +119,12 @@ class Ticket(models.Model):
         null=True,
         blank=True
     )
+
+    @property
+    def long_unassigned(self):
+        if self.assigned_technician is None and (timezone.now() - self.created_date) >= timedelta(hours=24):
+            return True
+        return False
 
     def change_status(self,user, new_status):
         old_status = self.status
