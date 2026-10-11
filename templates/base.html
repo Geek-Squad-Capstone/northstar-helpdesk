@@ -7,6 +7,19 @@
     <link rel="stylesheet" href="{% static 'css/styles.css' %}">
 </head>
 <body>
+    <nav>
+        <ul>
+            <li><a href="{% url 'home' %}">Home</a></li>
+            <li><a href="{% url 'dashboard' %}">Dashboard</a></li>
+            <li><a href="{% url 'tickets' %}">My Tickets</a></li>
+
+            {% if user.is_authenticated %}
+              {% if user.profile.role == "technician" or user.profile.role == "administrator" %}
+                <li><a href="{% url 'ticket_queue' %}">Ticket Queue</a></li>
+              {% endif %}
+            {% endif %}
+        </ul>
+    </nav>
     {% if user.is_authenticated %}
         <p>Welcome, {{ user.username }}! </p>           
             <form method="post" action="{% url 'logout' %}">
@@ -16,6 +29,15 @@
     {% else %}
         <p><a href="{% url 'login' %}">Login</a></p>
     {% endif %}
+
+    {% if messages %}
+        {% for message in messages %}
+            <div class="message {{ message.tags }}">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endif %}  
+
     {% block content %}
     {% endblock %}
 </body>

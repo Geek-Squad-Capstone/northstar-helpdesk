@@ -1,19 +1,3 @@
-"""
-URL configuration for helpdesk project.
-
-The `urlpatterns` list routes URLs to views. For more information please see:
-    https://docs.djangoproject.com/en/6.1/topics/http/urls/
-Examples:
-Function views
-    1. Add an import:  from my_app import views
-    2. Add a URL to urlpatterns:  path('', views.home, name='home')
-Class-based views
-    1. Add an import:  from other_app.views import Home
-    2. Add a URL to urlpatterns:  path('', Home.as_view(), name='home')
-Including another URLconf
-    1. Import the include() function: from django.urls import include, path
-    2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
-"""
 from django.contrib import admin
 from django.urls import include, path
 from support import views
@@ -21,7 +5,13 @@ from support import views
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', views.index, name='home'),
+    path('dashboard/', views.dashboard, name='dashboard'),
+    path('tickets/', views.tickets, name='tickets'),
+    path('tickets/create/', views.create_ticket, name='create_ticket'),
     path('accounts/', include('django.contrib.auth.urls')),
     path('tickets/', views.ticket_list, name='ticket_list'),
     path('tickets/<int:ticket_id>/assign/', views.assign_technician, name='assign_technician'),
+    path('ticket/queue/', views.ticket_queue, name='ticket_queue'),
+    path('categories/', views.category_management, name='category_management'),
+    path('categories/<int:category_id>/toggle/', views.toggle_category_status, name='toggle_category_status'),
 ]
