@@ -89,3 +89,55 @@ class TechnicianAssignmentTests(TestCase):
 
         self.assertEqual(response.status_code, 403)
         self.assertIsNone(self.ticket.assigned_technician)
+
+    def test_anonymous_user_cannot_assign_technician(self):
+        response = self.client.post(
+            reverse(
+                'assign_technician',
+                args=[self.ticket.id]
+            ),
+            {'technician': self.technician.id}
+        )
+
+        self.ticket.refresh_from_db()
+
+        self.assertIn(response.status_code, [302, 401, 403])
+        self.assertIsNone(self.ticket.assigned_technician)
+
+    def test_administrator_cannot_assign_invalid_technician(self):
+        self.client.login(
+            username='admin_test',
+            password='testpass123'
+        )
+
+        response = self.client.post(
+            reverse(
+                'assign_technician',
+                args=[self.ticket.id]
+            ),
+            {'technician': 999999}
+        )
+
+        self.ticket.refresh_from_db()
+
+        self.assertEqual(response.status_code, 404)
+        self.assertIsNone(self.ticket.assigned_technician)
+
+    def test_technician_cannot_assign_technician(self):
+        self.client.login(
+            username='technician_test',
+            password='testpass123'
+        )
+
+        response = self.client.post(
+            reverse(
+                'assign_technician',
+                args=[self.ticket.id]
+            ),
+            {'technician': self.technician.id}
+        )
+
+        self.ticket.refresh_from_db()
+
+        self.assertEqual(response.status_code, 403)
+        self.assertIsNone(self.ticket.assigned_technician)
