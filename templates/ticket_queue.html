@@ -24,6 +24,7 @@
                     <p><span style="color: red;"><strong>⚠ Unassigned for more than 24 hours</strong></span></p>
                 {% endif %}
 
+        <div class="ticket-actions">
             {% if user.profile.role == "technician" %}
                 {% if not ticket.assigned_technician %}
                     <form method="post" action="{% url 'claim_ticket' ticket.id %}">
@@ -32,6 +33,13 @@
                     </form>
                 {% endif %}
             {% endif %}
+            
+            {% if user.profile.role == "technician" or user.profile.role == "administrator" %}
+                <form action="{% url 'edit_ticket_status' ticket.id %}" method="get">
+                    <button type="submit">Edit Status</button>
+                </form>
+            {% endif %}
+        </div>
         </div>
     {% empty %}
         <p>No tickets are currently in the queue.</p>

@@ -54,6 +54,33 @@ def ticket_queue(request):
         {"tickets": tickets}
     )
 
+@role_required("technician", "administrator")
+def edit_ticket_status(request, ticket_id):
+    ticket = get_object_or_404(Ticket, id=ticket_id)
+
+    status_choices = [
+        "Open",
+        "In Progress",
+        "Resolved",
+        "Closed",
+    ]
+
+    if request.method == "POST":
+        new_status = request.POST.get("status")
+
+        if new_status in status_choices:
+            ticket.change_status(request.user, new_status)
+            return redirect("ticket_queue")
+
+    return render(
+        request,
+        "edit_ticket_status.html",
+        {
+            "ticket": ticket,
+            "status_choices": status_choices,
+        }
+    )
+
 @role_required("technician")
 def claim_ticket(request, ticket_id):
     ticket = get_object_or_404(Ticket, id=ticket_id)
