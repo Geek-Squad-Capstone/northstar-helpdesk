@@ -2,7 +2,7 @@ from django.test import TestCase
 from django.contrib.auth.models import User
 from django.urls import reverse
 
-from .models import UserProfile, Category, Ticket, AuditLog
+from .models import UserProfile, Category, Ticket, AuditLog, Comment
 
 
 class TechnicianAssignmentTests(TestCase):
@@ -564,3 +564,79 @@ class TicketDetailTests(TestCase):
     def test_anonymous_user_redirected_from_ticket_detail(self):
         response = self.client.get(reverse('ticket_detail', args=[self.ticket.id]))
         self.assertEqual(response.status_code, 302)
+
+    def test_owner_can_add_comment(self):
+        self.client.login(
+            username='detail_owner',
+            password='testpass123'
+        )
+        response = self.client.post(
+            reverse('ticket_detail', args=[self.ticket.id]),
+            {'comment_text': 'Owner comment test.'}
+        )
+        self.assertEqual(response.status_code, 302)
+
+        self.assertTrue(
+            Comment.objects.filter(
+                ticket=self.ticket, 
+                author=self.owner, 
+                comment_text='Owner comment test.'
+                ).exists()
+                )
+
+    def test_technician_can_add_comment(self):
+        self.client.login(
+            username='detail_technician',
+            password='testpass123'
+        )
+        response = self.client.post(
+            reverse('ticket_detail', args=[self.ticket.id]),
+            {'comment_text': 'Technician comment test.'}
+        )
+        self.assertEqual(response.status_code, 302)
+
+        self.assertTrue(
+            Comment.objects.filter(
+                ticket=self.ticket, 
+                author=self.technician, 
+                comment_text='Technician comment test.'
+                ).exists()
+                )
+
+    def test_administrator_can_add_comment(self):
+        self.client.login(
+            username='detail_admin',
+            password='testpass123'
+        )
+        response = self.client.post(
+            reverse('ticket_detail', args=[self.ticket.id]),
+            {'comment_text': 'Administrator comment test.'}
+        )
+        self.assertEqual(response.status_code, 302)
+
+        self.assertTrue(
+            Comment.objects.filter(
+                ticket=self.ticket, 
+                author=self.admin, 
+                comment_text='Administrator comment test.'
+                ).exists()
+                )
+
+    def test_unauthorized_user_cannot_add_comment(self):
+        self.client.login(
+            username='detail_other',
+            password='testpass123'
+        )
+        response = self.client.post(
+            reverse('ticket_detail', args=[self.ticket.id]),
+            {'comment_text': 'Unauthorized comment test.'}
+        )
+        self.assertEqual(response.status_code, 403)
+
+        self.assertFalse(
+            Comment.objects.filter(
+                ticket=self.ticket, 
+                author=self.other_user, 
+                comment_text='Unauthorized comment test.'
+                ).exists()
+                )
