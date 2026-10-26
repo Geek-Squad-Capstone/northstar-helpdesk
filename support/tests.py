@@ -472,3 +472,95 @@ class AuditLoggingTests(TestCase):
         self.assertEqual(log.user, self.technician)
         self.assertEqual(log.ticket, self.ticket)
         self.assertIsNotNone(log.timestamp)
+
+class TicketDetailTests(TestCase):
+    def setUp(self):
+        self.owner = User.objects.create_user(
+            username='detail_owner',
+            password='testpass123'
+        )
+
+        UserProfile.objects.create(
+            user=self.owner,
+            role='regular_user'
+        )
+
+        self.other_user = User.objects.create_user(
+            username='detail_other',
+            password='testpass123'
+        )
+
+        UserProfile.objects.create(
+            user=self.other_user,
+            role='regular_user'
+        )
+
+        self.technician = User.objects.create_user(
+            username='detail_technician',
+            password='testpass123'
+        )
+
+        UserProfile.objects.create(
+            user=self.technician,
+            role='technician'
+        )
+
+        self.admin = User.objects.create_user(
+            username='detail_admin',
+            password='testpass123'
+        )
+
+        UserProfile.objects.create(
+            user=self.admin,
+            role='administrator'
+        )
+
+        self.category = Category.objects.create(
+            category_name='Hardware'
+        )
+
+        self.ticket = Ticket.objects.create(
+            submitted_by=self.owner,
+            category=self.category,
+            title='Detail Test Ticket',
+            affected_device_system='Desktop',
+            description='Test detail test',
+            priority='Medium',
+            department='IT'
+        )
+
+    def test_owner_can_view_ticket_detail(self):
+        self.client.login(
+            username='detail_owner',
+            password='testpass123'
+        )
+        response = self.client.get(reverse('ticket_detail', args=[self.ticket.id]))
+        self.assertEqual(response.status_code, 200)
+
+    def test_other_regular_user_cannot_view_ticket_detail(self):
+        self.client.login(
+            username='detail_other',
+            password='testpass123'
+        )
+        response = self.client.get(reverse('ticket_detail', args=[self.ticket.id]))
+        self.assertEqual(response.status_code, 403)
+
+    def test_technician_can_view_ticket_detail(self):
+        self.client.login(
+            username='detail_technician',
+            password='testpass123'
+        )
+        response = self.client.get(reverse('ticket_detail', args=[self.ticket.id]))
+        self.assertEqual(response.status_code, 200)
+
+    def test_administrator_can_view_ticket_detail(self):
+        self.client.login(
+            username='detail_admin',
+            password='testpass123'
+        )
+        response = self.client.get(reverse('ticket_detail', args=[self.ticket.id]))
+        self.assertEqual(response.status_code, 200)
+
+    def test_anonymous_user_redirected_from_ticket_detail(self):
+        response = self.client.get(reverse('ticket_detail', args=[self.ticket.id]))
+        self.assertEqual(response.status_code, 302)

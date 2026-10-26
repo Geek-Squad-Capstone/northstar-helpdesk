@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Ticket #{{ ticket.id }}</h1>
+<h2>{{ ticket.title }}</h2>
+<p>Status: {{ ticket.status }}</p>
+<p>Priority: {{ ticket.priority }}</p>
+<p>Category: {{ ticket.category }}</p>
+<p>Department: {{ ticket.department }}</p>
+<p>Affected device/system: {{ ticket.affected_device_system }}</p>
+
+<p>Description: </p>
+<p>{{ ticket.description }}</p>
+
+<p>Submitted By: {{ ticket.submitted_by }}</p>
+
+<p>Assigned Technician: 
+    {% if ticket.assigned_technician %}
+        {{ ticket.assigned_technician }}
+    {% else %}
+        Unassigned
+    {% endif %}
+</p>
+
+<p>Created: {{ ticket.created_date }}</p>
+<p>Last Updated: {{ ticket.last_updated_date }}</p>
+
+{% endblock %}

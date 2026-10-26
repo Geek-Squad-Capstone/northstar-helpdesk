@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from .models import Ticket, UserProfile, Category 
-from .permissions import role_required
+from .permissions import PermissionDenied, role_required
 from .forms import TicketForm, CategoryForm
 from django.contrib import messages
 
@@ -52,6 +52,20 @@ def ticket_queue(request):
         request,
         "ticket_queue.html",
         {"tickets": tickets}
+    )
+
+@login_required
+def ticket_detail(request, ticket_id):
+    ticket = get_object_or_404(Ticket, id=ticket_id)
+
+    if (request.user != ticket.submitted_by and request.user.profile.role not in ["technician", "administrator"]
+    ):
+        raise PermissionDenied
+    
+    return render(
+        request,
+        "ticket_detail.html",
+        {"ticket": ticket}
     )
 
 @role_required("technician", "administrator")
