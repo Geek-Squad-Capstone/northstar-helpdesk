@@ -907,8 +907,47 @@ class TicketDetailTests(TestCase):
             "Regular User View Test"
         )
 
+    def test_resolved_status_sets_resolved_date(self):
+        self.ticket.change_status(
+            self.technician,
+            "Resolved"
+        )
 
-                
+        self.ticket.refresh_from_db()
+
+        self.assertEqual(
+            self.ticket.status,
+            "Resolved"
+        )
+
+        self.assertIsNotNone(
+            self.ticket.resolved_date
+        )
+
+    def test_closed_status_sets_closed_date(self):
+        self.ticket.change_status(
+            self.technician,
+            "Closed"
+        )
         
+        self.ticket.refresh_from_db()
 
+        self.assertEqual(
+            self.ticket.status,
+            "Closed"
+        )
 
+        self.assertIsNotNone(
+            self.ticket.closed_date
+        )
+
+    def test_close_ticket_adds_timestamp(self):
+        self.ticket.close_ticket(
+            self.technician
+        )
+
+        self.ticket.refresh_from_db()
+
+        self.assertIsNotNone(
+            self.ticket.closed_date
+        )

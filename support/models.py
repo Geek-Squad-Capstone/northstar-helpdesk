@@ -129,6 +129,12 @@ class Ticket(models.Model):
     def change_status(self,user, new_status):
         old_status = self.status
         self.status = new_status
+
+        if new_status == "Resolved":
+            self.resolved_date = timezone.now()
+        elif new_status == "Closed":
+            self.closed_date = timezone.now()
+
         self.save()
 
         AuditLog.objects.create(
@@ -149,6 +155,7 @@ class Ticket(models.Model):
 
     def close_ticket(self, user):
         self.status = "Closed"
+        self.closed_date = timezone.now()
         self.save()
 
         AuditLog.objects.create(
