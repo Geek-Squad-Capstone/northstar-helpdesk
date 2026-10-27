@@ -1,89 +1,127 @@
 {% extends 'base.html' %}
 
 {% block content %}
-    <h1>Ticket Queue</h1>
 
-    <table>
-        <thead>
+<style>
+    .ticket-table {
+        border-collapse: collapse;
+        width: 100%;
+    }
+
+    .ticket-table th,
+    .ticket-table td {
+        border: 1px solid #999;
+        padding: 8px 12px;
+        text-align: left;
+        vertical-align: top;
+    }
+
+    .ticket-table th {
+        font-weight: bold;
+    }
+
+    .ticket-actions {
+        min-width: 120px;
+    }
+
+    .ticket-actions form {
+        display: inline-block;
+        margin-right: 6px;
+        margin-top: 4px;
+        margin-bottom: 0;
+    }
+</style>
+
+<h1>Ticket Queue</h1>
+
+<table class="ticket-table">
+    <thead>
+        <tr>
+            <th>Ticket #</th>
+            <th>Title</th>
+            <th>Status</th>
+            <th>Priority</th>
+            <th>Category</th>
+            <th>Submitted By</th>
+            <th>Assigned To</th>
+            <th>Created</th>
+            <th>Warning</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        {% for ticket in tickets %}
             <tr>
-                <th>Ticket #</th>
-                <th>Title</th>
-                <th>Status</th>
-                <th>Priority</th>
-                <th>Category</th>
-                <th>Submitted By</th>
-                <th>Assigned To</th>
-                <th>Created</th>
-                <th>Warning</th>
-                <th>Actions</th>
+                <td>{{ ticket.id }}</td>
+                <td>{{ ticket.title }}</td>
+                <td>{{ ticket.status }}</td>
+                <td>{{ ticket.priority }}</td>
+                <td>{{ ticket.category }}</td>
+                <td>{{ ticket.submitted_by }}</td>
+
+                <td>
+                    {% if ticket.assigned_technician %}
+                        {{ ticket.assigned_technician.username }}
+                    {% else %}
+                        Unassigned
+                    {% endif %}
+                </td>
+
+                <td>{{ ticket.created_date }}</td>
+
+                <td>
+                    {% if user.profile.role == "administrator" and ticket.long_unassigned %}
+                        <strong>⚠ Unassigned for more than 24 hours</strong>
+                    {% endif %}
+                </td>
+
+                <td class="ticket-actions">
+                    <a href="{% url 'ticket_detail' ticket.id %}">
+                        View Details
+                    </a>
+
+                    {% if user.profile.role == "technician" %}
+                        {% if not ticket.assigned_technician %}
+                            <form method="post"
+                                  action="{% url 'claim_ticket' ticket.id %}">
+                                {% csrf_token %}
+                                <button type="submit">Claim Ticket</button>
+                            </form>
+                        {% endif %}
+                    {% endif %}
+
+                    {% if user.profile.role == "technician" or user.profile.role == "administrator" %}
+                        <form action="{% url 'edit_ticket_status' ticket.id %}"
+                              method="get">
+                            <button type="submit">Edit Status</button>
+                        </form>
+                    {% endif %}
+
+                    {% if user.profile.role == "technician" %}
+                        <form action="{% url 'edit_ticket_priority' ticket.id %}"
+                              method="get">
+                            <button type="submit">Edit Priority</button>
+                        </form>
+                    {% endif %}
+
+                    {% if user.profile.role == "technician" %}
+                        <form action="{% url 'edit_ticket_category' ticket.id %}"
+                              method="get">
+                            <button type="submit">Edit Category</button>
+                        </form>
+                    {% endif %}
+                </td>
             </tr>
-        </thead>
 
-        <tbody>
-            {% for ticket in tickets %}
-                <tr>
-                    <td>{{ ticket.id }}</td>
-                    <td>{{ ticket.title }}</td>
-                    <td>{{ ticket.status }}</td>
-                    <td>{{ ticket.priority }}</td>
-                    <td>{{ ticket.category }}</td>
-                    <td>{{ ticket.submitted_by }}</td>
-
-                    <td>
-                        {% if ticket.assigned_technician %}
-                            {{ ticket.assigned_technician.username }}
-                        {% else %}
-                            Unassigned
-                        {% endif %}
-                    </td>
-
-                    <td>{{ ticket.created_date }}</td>
-
-                    <td>
-                        {% if user.profile.role == "administrator" and ticket.long_unassigned %}
-                            <strong>⚠ Unassigned for more than 24 hours</strong>
-                        {% endif %}
-                    </td>
-
-                    <td>
-                        <a href="{% url 'ticket_detail' ticket.id %}">
-                            View Details
-                        </a>
-
-                        {% if user.profile.role == "technician" %}
-                            {% if not ticket.assigned_technician %}
-                                <form method="post"
-                                      action="{% url 'claim_ticket' ticket.id %}">
-                                    {% csrf_token %}
-                                    <button type="submit">Claim Ticket</button>
-                                </form>
-                            {% endif %}
-                        {% endif %}
-
-                        {% if user.profile.role == "technician" or user.profile.role == "administrator" %}
-                            <form action="{% url 'edit_ticket_status' ticket.id %}"
-                                  method="get">
-                                <button type="submit">Edit Status</button>
-                            </form>
-                        {% endif %}
-
-                        {% if user.profile.role == "technician" %}
-                            <form action="{% url 'edit_ticket_priority' ticket.id %}"
-                            method="get">
-                                <button type="submit">Edit Priority</button>
-                            </form>
-                        {% endif %}
-                    </td>
-                </tr>
-
-            {% empty %}
-                <tr>
-                    <td colspan="10">
-                        No tickets are currently in the queue.
-                    </td>
-                </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+        {% empty %}
+            <tr>
+                <td colspan="10">
+                    No tickets are currently in the queue.
+                </td>
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>
 
 {% endblock %}
