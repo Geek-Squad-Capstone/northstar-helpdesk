@@ -32,4 +32,5 @@ urlpatterns = [
     path("tickets/<int:ticket_id>/claim/",views.claim_ticket,name="claim_ticket"),
     path("ticket/<int:ticket_id>/edit-status/",views.edit_ticket_status,name="edit_ticket_status",),
     path("ticket/<int:ticket_id>/ticket_detail/",views.ticket_detail,name="ticket_detail"),
+    path("ticket/<int:ticket_id>/edit-priority/", views.edit_ticket_priority, name="edit_ticket_priority"),
 ]

@@ -202,3 +202,26 @@ def toggle_category_status(request, category_id):
         category.save()
 
     return redirect("category_management")
+
+@role_required("technician")
+def edit_ticket_priority(request, ticket_id):
+    ticket = get_object_or_404(Ticket, id=ticket_id)
+
+    priority_choices = [choice[0] for choice in Ticket.priority_choices]
+
+    if request.method == "POST":
+        new_priority = request.POST.get("priority")
+
+        if new_priority in priority_choices:
+            ticket.priority = new_priority
+            ticket.save()
+            return redirect("ticket_queue")
+
+    return render(
+        request,
+        "edit_ticket_priority.html",
+        {
+            "ticket": ticket,
+            "priority_choices": priority_choices,
+        }
+    )

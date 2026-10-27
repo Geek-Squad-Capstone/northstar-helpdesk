@@ -66,6 +66,13 @@
                                 <button type="submit">Edit Status</button>
                             </form>
                         {% endif %}
+
+                        {% if user.profile.role == "technician" %}
+                            <form action="{% url 'edit_ticket_priority' ticket.id %}"
+                            method="get">
+                                <button type="submit">Edit Priority</button>
+                            </form>
+                        {% endif %}
                     </td>
                 </tr>
 

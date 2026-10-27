@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <h1>Edit Ticket Priority</h1>
+
+    <h3>{{ ticket.title }}</h3>
+
+    <p>Current Priority: {{ ticket.priority }}</p>
+
+    <form method="post">
+        {% csrf_token %}
+
+        <label for="priority">New Priority:</label>
+
+        <select name="priority" id="priority">
+            {% for priority in priority_choices %}
+                <option value="{{ priority }}">{{ priority }}</option>
+            {% endfor %}
+        </select>
+
+        <button type="submit">Update Priority</button>
+    </form>
+{% endblock %}
