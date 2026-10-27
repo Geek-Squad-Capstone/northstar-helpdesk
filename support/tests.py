@@ -2,7 +2,7 @@ from django.test import TestCase
 from django.contrib.auth.models import User
 from django.urls import reverse
 
-from .models import UserProfile, Category, Ticket, AuditLog, Comment
+from .models import UserProfile, Category, Ticket, AuditLog, Comment, InternalNote
 
 
 class TechnicianAssignmentTests(TestCase):
@@ -141,7 +141,6 @@ class TechnicianAssignmentTests(TestCase):
 
         self.assertEqual(response.status_code, 403)
         self.assertIsNone(self.ticket.assigned_technician)
-
 
 class AuthenticationRBACTests(TestCase):
 
@@ -735,7 +734,6 @@ class TicketDetailTests(TestCase):
 
         self.assertEqual(self.ticket.category, active_category)
 
-
     def test_technician_cannot_set_inactive_category(self):
         inactive_category = Category.objects.create(
             category_name="Retired Category",
@@ -759,7 +757,6 @@ class TicketDetailTests(TestCase):
         self.assertEqual(response.status_code, 200)
 
         self.assertEqual(self.ticket.category, original_category)
-
 
     def test_regular_user_cannot_edit_ticket_category(self):
         active_category = Category.objects.create(
@@ -785,7 +782,6 @@ class TicketDetailTests(TestCase):
 
         self.assertEqual(self.ticket.category, original_category)
 
-
     def test_administrator_cannot_edit_ticket_category(self):
         active_category = Category.objects.create(
             category_name="Software",
@@ -809,4 +805,110 @@ class TicketDetailTests(TestCase):
         self.assertEqual(response.status_code, 403)
 
         self.assertEqual(self.ticket.category, original_category)
+
+    def test_technician_can_add_internal_note(self):
+        self.client.login(
+            username='detail_technician',
+            password='testpass123'
+        )
+
+        response = self.client.post(
+            reverse('add_internal_note', args=[self.ticket.id]),
+            {"note_text": "Restarted print spooler"}
+        )
+
+        self.assertEqual(response.status_code, 302)
+
+        self.assertTrue(
+            InternalNote.objects.filter(
+                ticket=self.ticket,
+                author=self.technician,
+                note_text="Restarted print spooler"
+            ).exists()
+        )
+
+    def test_whitespace_does_not_create_internal_note(self):
+        self.client.login(
+            username='detail_technician',
+            password='testpass123'
+        )
+
+        response = self.client.post(
+            reverse('add_internal_note', args=[self.ticket.id]),
+            {"note_text": " "}
+        )
+
+        self.assertEqual(response.status_code, 302)
+
+        self.assertFalse(
+            InternalNote.objects.filter(
+                ticket=self.ticket
+            ).exists()
+        )
+
+    def test_administrator_cannot_add_internal_note(self):
+        self.client.login(
+            username='detail_admin',
+            password='testpass123'
+        )
+
+        response = self.client.post(
+            reverse('add_internal_note', args=[self.ticket.id]),
+            {"note_text": "Admin Test Internal Note"}
+        )
+
+        self.assertEqual(response.status_code, 403)
+
+        self.assertFalse(
+            InternalNote.objects.filter(
+                ticket=self.ticket
+            ).exists()
+        )
+
+    def test_regular_user_cannot_add_internal_note(self):
+        self.client.login(
+            username='detail_other',
+            password='testpass123'
+        )
+
+        response = self.client.post(
+            reverse('add_internal_note', args=[self.ticket.id]),
+            {"note_text": "Regular User Test Internal Note"}
+        )
+
+        self.assertEqual(response.status_code, 403)
+
+        self.assertFalse(
+            InternalNote.objects.filter(
+                ticket=self.ticket
+            ).exists()
+        )
+
+    def test_regular_user_cannot_see_internal_notes(self):
+        InternalNote.objects.create(
+            ticket=self.ticket,
+            author=self.technician,
+            note_text="Regular User View Test"
+        )
+
+        self.client.login(
+            username='detail_owner',
+            password='testpass123'
+        )
+
+        response = self.client.get(
+            reverse('ticket_detail', args=[self.ticket.id])
+        )
+
+        self.assertEqual(response.status_code, 200)
+
+        self.assertNotContains(
+            response,
+            "Regular User View Test"
+        )
+
+
+                
+        
+
 

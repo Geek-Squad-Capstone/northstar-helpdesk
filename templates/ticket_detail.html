@@ -24,6 +24,39 @@
 <p>Created: {{ ticket.created_date }}</p>
 <p>Last Updated: {{ ticket.last_updated_date }}</p>
 
+{% if user.profile.role == "technician" or user.profile.role == "administrator" %}
+    <h3>Internal Notes:</h3>
+
+    {% for note in ticket.internal_notes.all %}
+        <p>
+            <strong> {{ note.author }}</strong>
+            ({{ note.created_date }}):
+            {{ note.note_text }}
+        </p>
+    {% empty %}
+        <p>No internal notes yet.</p>
+    {% endfor %}
+{% endif %}
+
+{% if user.profile.role == "technician" %}
+        <form method="post"
+            action="{% url 'add_internal_note' ticket.id %}">
+            {% csrf_token %}
+
+            <label for="note_text">Add Internal Note:</label><br>
+
+            <textarea
+                name="note_text"
+                id="note_text"
+                rows="4"
+                cols="60"
+                required
+            ></textarea><br>
+
+            <button type="submit">Add Internal Note</button>
+        </form>
+{% endif %}
+
 <h3>Comments:</h3>
 
 {% for comment in ticket.comments.all %}

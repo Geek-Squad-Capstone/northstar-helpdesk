@@ -19,19 +19,97 @@ from django.urls import include, path
 from support import views
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
-    path('', views.index, name='home'),
-    path('dashboard/', views.dashboard, name='dashboard'),
-    path('tickets/', views.tickets, name='tickets'),
-    path('tickets/create/', views.create_ticket, name='create_ticket'),
-    path('tickets/<int:ticket_id>/assign/', views.assign_technician, name='assign_technician'), 
-    path('accounts/', include('django.contrib.auth.urls')),
-    path("ticket/queue/",views.ticket_queue,name="ticket_queue"),
-    path("categories/",views.category_management,name="category_management"),
-    path("categories/<int:category_id>/toggle/",views.toggle_category_status,name="toggle_category_status"),
-    path("tickets/<int:ticket_id>/claim/",views.claim_ticket,name="claim_ticket"),
-    path("ticket/<int:ticket_id>/edit-status/",views.edit_ticket_status,name="edit_ticket_status",),
-    path("ticket/<int:ticket_id>/ticket_detail/",views.ticket_detail,name="ticket_detail"),
-    path("ticket/<int:ticket_id>/edit-priority/", views.edit_ticket_priority, name="edit_ticket_priority"),
-    path("ticket/<int:ticket_id>/edit-category/", views.edit_ticket_category, name="edit_ticket_category"),
+    path(
+        'admin/', 
+        admin.site.urls
+        ),
+    
+    path(
+        '', 
+        views.index, 
+        name='home'
+        ),
+    
+    path(
+        'dashboard/', 
+        views.dashboard, 
+        name='dashboard'
+        ),
+    
+    path(
+        'tickets/', 
+        views.tickets, 
+        name='tickets'
+        ),
+    
+    path(
+        'tickets/create/', 
+        views.create_ticket, 
+        name='create_ticket'
+        ),
+    
+    path(
+        'tickets/<int:ticket_id>/assign/', 
+        views.assign_technician, 
+        name='assign_technician'
+        ), 
+    
+    path(
+        'accounts/', 
+        include('django.contrib.auth.urls')
+        ),
+    
+    path(
+        "ticket/queue/",
+        views.ticket_queue,
+        name="ticket_queue"
+        ),
+    
+    path(
+        "categories/",
+        views.category_management,
+        name="category_management"
+        ),
+    
+    path(
+        "categories/<int:category_id>/toggle/",
+        views.toggle_category_status,
+        name="toggle_category_status"
+        ),
+    
+    path(
+        "tickets/<int:ticket_id>/claim/",
+        views.claim_ticket,
+        name="claim_ticket"
+        ),
+    
+    path(
+        "ticket/<int:ticket_id>/edit-status/",
+        views.edit_ticket_status,
+        name="edit_ticket_status",
+        ),
+    
+    path(
+        "ticket/<int:ticket_id>/ticket_detail/",
+        views.ticket_detail,
+        name="ticket_detail"
+        ),
+    
+    path(
+        "ticket/<int:ticket_id>/edit-priority/", 
+        views.edit_ticket_priority, 
+        name="edit_ticket_priority"
+        ),
+    
+    path(
+        "ticket/<int:ticket_id>/edit-category/", 
+        views.edit_ticket_category, 
+        name="edit_ticket_category"
+        ),
+
+    path(
+        "ticket/<int:ticket_id>/add-internal-note/",
+        views.add_internal_note,
+        name="add_internal_note"
+    ),
 ]
