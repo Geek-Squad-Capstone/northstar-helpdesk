@@ -713,3 +713,100 @@ class TicketDetailTests(TestCase):
 
         self.assertEqual(self.ticket.priority, original_priority)
 
+    def test_technician_can_edit_ticket_category(self):
+        active_category = Category.objects.create(
+            category_name="Software",
+            category_status=True
+        )
+
+        self.client.login(
+            username='detail_technician',
+            password='testpass123'
+        )
+
+        response = self.client.post(
+            reverse('edit_ticket_category', args=[self.ticket.id]),
+            {"category": active_category.id}
+        )
+
+        self.assertEqual(response.status_code, 302)
+
+        self.ticket.refresh_from_db()
+
+        self.assertEqual(self.ticket.category, active_category)
+
+
+    def test_technician_cannot_set_inactive_category(self):
+        inactive_category = Category.objects.create(
+            category_name="Retired Category",
+            category_status=False
+        )
+
+        self.client.login(
+            username='detail_technician',
+            password='testpass123'
+        )
+
+        original_category = self.ticket.category
+
+        response = self.client.post(
+            reverse('edit_ticket_category', args=[self.ticket.id]),
+            {"category": inactive_category.id}
+        )
+
+        self.ticket.refresh_from_db()
+
+        self.assertEqual(response.status_code, 200)
+
+        self.assertEqual(self.ticket.category, original_category)
+
+
+    def test_regular_user_cannot_edit_ticket_category(self):
+        active_category = Category.objects.create(
+            category_name="Software",
+            category_status=True
+        )
+        
+        self.client.login(
+            username='detail_other',
+            password='testpass123'
+        )
+
+        original_category = self.ticket.category
+
+        response = self.client.post(
+            reverse('edit_ticket_category', args=[self.ticket.id]),
+            {"category": active_category.id}
+        )
+
+        self.ticket.refresh_from_db()
+
+        self.assertEqual(response.status_code, 403)
+
+        self.assertEqual(self.ticket.category, original_category)
+
+
+    def test_administrator_cannot_edit_ticket_category(self):
+        active_category = Category.objects.create(
+            category_name="Software",
+            category_status=True
+        )
+        
+        self.client.login(
+            username='detail_admin',
+            password='testpass123'
+        )
+
+        original_category = self.ticket.category
+
+        response = self.client.post(
+            reverse('edit_ticket_category', args=[self.ticket.id]),
+            {"category": active_category.id}
+        )
+
+        self.ticket.refresh_from_db()
+
+        self.assertEqual(response.status_code, 403)
+
+        self.assertEqual(self.ticket.category, original_category)
+

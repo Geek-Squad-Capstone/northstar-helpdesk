@@ -225,3 +225,28 @@ def edit_ticket_priority(request, ticket_id):
             "priority_choices": priority_choices,
         }
     )
+
+@role_required("technician")
+def edit_ticket_category(request, ticket_id):
+    ticket = get_object_or_404(Ticket, id=ticket_id)
+
+    active_categories = Category.objects.filter(category_status=True)
+
+    if request.method == "POST":
+        category_id = request.POST.get("category")
+
+        selected_category = active_categories.filter(id=category_id).first()
+
+        if selected_category:
+            ticket.category = selected_category
+            ticket.save()
+            return redirect("ticket_queue")
+
+    return render(
+        request,
+        "edit_ticket_category.html",
+        {
+            "ticket": ticket,
+            "active_categories": active_categories,
+        }
+    )
