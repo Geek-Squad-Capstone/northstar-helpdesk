@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
-from .models import Ticket, UserProfile, Category 
+from .models import Ticket, UserProfile, Category, InternalNote 
 from .permissions import PermissionDenied, role_required
 from .forms import TicketForm, CategoryForm, CommentForm
 from django.contrib import messages
@@ -250,3 +250,19 @@ def edit_ticket_category(request, ticket_id):
             "active_categories": active_categories,
         }
     )
+
+@role_required("technician")
+def add_internal_note(request, ticket_id):
+    ticket = get_object_or_404(Ticket, id=ticket_id)
+
+    if request.method == "POST":
+        note_text = request.POST.get("note_text", "").strip()
+
+        if note_text:
+            InternalNote.objects.create(
+                ticket=ticket,
+                author=request.user,
+                note_text=note_text
+            )
+
+    return redirect("ticket_detail", ticket_id=ticket.id)

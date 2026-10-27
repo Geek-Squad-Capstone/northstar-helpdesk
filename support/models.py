@@ -198,3 +198,21 @@ class AuditLog(models.Model):
 
     def __str__(self):
         return f"{self.user.username} - {self.action}"
+
+class InternalNote(models.Model):
+
+    ticket = models.ForeignKey(
+        Ticket,
+        on_delete=models.CASCADE,
+        related_name="internal_notes"
+    )
+
+    author = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name="internal_notes"
+    )
+
+    note_text = models.TextField()
+
+    created_date = models.DateTimeField(auto_now_add=True)
