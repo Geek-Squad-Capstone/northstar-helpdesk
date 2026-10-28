@@ -1035,3 +1035,15 @@ class TicketDetailTests(TestCase):
                 action="Ticket reopened"
             ).exists()
         )
+
+    def test_reopening_ticket_sets_admin_attention_flag(self):
+        self.ticket.status = "Closed"
+        self.ticket.save()
+
+        self.ticket.reopen_ticket(self.owner)
+
+        self.ticket.refresh_from_db()
+
+        self.assertTrue(
+            self.ticket.requires_admin_attention
+        )

@@ -30,6 +30,12 @@
         margin-top: 4px;
         margin-bottom: 0;
     }
+
+    .warning-text {
+        color: red;
+        font-weight: bold;
+    }
+
 </style>
 
 <h1>Ticket Queue</h1>
@@ -71,8 +77,16 @@
                 <td>{{ ticket.created_date }}</td>
 
                 <td>
-                    {% if user.profile.role == "administrator" and ticket.long_unassigned %}
-                        <strong>⚠ Unassigned for more than 24 hours</strong>
+                    {% if user.profile.role == "administrator" %}
+                        
+                        {% if ticket.long_unassigned %}
+                            <strong class="warning-text">⚠ Unassigned for more than 24 hours</strong><br>
+                        {% endif %}
+
+                        {% if ticket.requires_admin_attention %}
+                            <strong class="warning-text">⚠ Reopened - Admin Attention</strong>
+                        {% endif %}
+                    
                     {% endif %}
                 </td>
 
