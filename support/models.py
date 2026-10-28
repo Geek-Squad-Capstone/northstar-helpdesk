@@ -120,6 +120,8 @@ class Ticket(models.Model):
         blank=True
     )
 
+    requires_admin_attention = models.BooleanField(default=False)
+
     @property
     def long_unassigned(self):
         if self.assigned_technician is None and (timezone.now() - self.created_date) >= timedelta(hours=24):
@@ -166,6 +168,7 @@ class Ticket(models.Model):
 
     def reopen_ticket(self, user):
         self.status = "Open"
+        self.requires_admin_attention = True
         self.save()
 
         AuditLog.objects.create(
