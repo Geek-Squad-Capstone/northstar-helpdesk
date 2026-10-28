@@ -124,4 +124,22 @@ urlpatterns = [
         views.closed_ticket_history,
         name="closed_ticket_history"
     ),
+
+    path(
+        "users/manage/",
+        views.user_management,
+        name="user_management"
+    ),
+
+    path(
+        "users/<int:user_id>/change-role/",
+        views.change_user_role,
+        name="change_user_role"
+    ),
+
+    path(
+        "users/<int:user_id>/deactivate/",
+        views.deactivate_user,
+        name="deactivate_user"
+    ),
 ]

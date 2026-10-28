@@ -33,6 +33,15 @@
                 {% if user.profile.role == "administrator" %}
                     <li><a href="{% url 'category_management' %}">Category Management</a></li>
                 {% endif %}
+
+                {% if user.profile.role == "administrator" %}
+                    <li>
+                        <a href="{% url 'user_management' %}">
+                            User Management
+                        </a>
+                    </li>
+                {% endif %}
+
             {% endif %}
         </ul>
     </nav>
