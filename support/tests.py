@@ -1047,3 +1047,169 @@ class TicketDetailTests(TestCase):
         self.assertTrue(
             self.ticket.requires_admin_attention
         )
+
+class TicketQueueFilterTests(TestCase):
+    def setUp(self):
+        self.technician = User.objects.create_user(
+            username='queue_technician',
+            password='testpass123'
+        )
+
+        UserProfile.objects.create(
+            user=self.technician,
+            role='technician'
+        )
+
+        self.owner1 = User.objects.create_user(
+            username='queue_owner1',
+            password='testpass123'
+        )
+
+        UserProfile.objects.create(
+            user=self.owner1,
+            role='regular_user'
+        )
+
+        self.owner2 = User.objects.create_user(
+            username='queue_owner2',
+            password='testpass123'
+        )
+
+        UserProfile.objects.create(
+            user=self.owner2,
+            role='regular_user'
+        )
+
+        self.technician1 = User.objects.create_user(
+            username='filter_technician1',
+            password='testpass123'
+        )
+
+        UserProfile.objects.create(
+            user=self.technician1,
+            role='technician'
+        )
+
+        self.technician2 = User.objects.create_user(
+            username='filter_technician2',
+            password='testpass123'
+        )
+
+        UserProfile.objects.create(
+            user=self.technician2,
+            role='technician'
+        )
+
+        self.category1 = Category.objects.create(
+            category_name='Hardware'
+        )
+
+        self.category2 = Category.objects.create(
+            category_name='Software'
+        )
+
+        self.ticket_a = Ticket.objects.create(
+            status = "Open",
+            submitted_by=self.owner1,
+            category=self.category1,
+            title='Ticket A',
+            department='Finance',
+            assigned_technician = self.technician1
+        )
+
+        self.ticket_b = Ticket.objects.create(
+            status = "Resolved",
+            submitted_by=self.owner2,
+            category=self.category1,
+            title='Ticket B',
+            department='IT',
+            assigned_technician = self.technician2
+        )
+
+        self.ticket_c = Ticket.objects.create(
+            status = "Open",
+            submitted_by=self.owner1,
+            category=self.category2,
+            title='Ticket C',
+            department='IT',
+            assigned_technician = None
+        )
+
+    def test_ticket_queue_filters_by_status(self):
+        self.client.login(
+            username = "queue_technician",
+            password = "testpass123"
+        )
+
+        response = self.client.get(
+            reverse("ticket_queue"),
+            {"status": "Resolved"}
+        )
+
+        self.assertEqual(response.status_code, 200)
+
+        tickets = response.context["tickets"]
+
+        self.assertIn(self.ticket_b, tickets)
+        self.assertNotIn(self.ticket_a, tickets)
+        self.assertNotIn(self.ticket_c, tickets)
+
+    def test_ticket_queue_filters_by_assignment_state(self):
+        self.client.login(
+            username='queue_technician',
+            password='testpass123'
+        )
+
+        response = self.client.get(
+            reverse("ticket_queue"),
+            {"assignment": "unassigned"}
+        )
+
+        self.assertEqual(response.status_code, 200)
+
+        tickets = response.context["tickets"]
+
+        self.assertIn(self.ticket_c, tickets)
+        self.assertNotIn(self.ticket_a, tickets)
+        self.assertNotIn(self.ticket_b, tickets)
+
+    def test_ticket_queue_combines_filters(self):
+        self.client.login(
+            username = "queue_technician",
+            password = "testpass123"
+        )
+
+        response = self.client.get(
+            reverse("ticket_queue"),
+            {
+                "status": "Open",
+                "department": "IT"
+            }
+        )
+
+        self.assertEqual(response.status_code, 200)
+
+        tickets = response.context["tickets"]
+
+        self.assertIn(self.ticket_c, tickets)
+        self.assertNotIn(self.ticket_a, tickets)
+        self.assertNotIn(self.ticket_b, tickets)
+
+    def test_ticket_queue_filters_by_ticket_number(self):
+        self.client.login(
+            username = "queue_technician",
+            password = "testpass123"
+        )
+
+        response = self.client.get(
+            reverse("ticket_queue"),
+            {"ticket_number": self.ticket_a.id}
+        )
+
+        self.assertEqual(response.status_code, 200)
+
+        tickets = response.context["tickets"]
+
+        self.assertIn(self.ticket_a, tickets)
+        self.assertNotIn(self.ticket_c, tickets)
+        self.assertNotIn(self.ticket_b, tickets)
