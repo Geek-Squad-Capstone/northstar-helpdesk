@@ -266,3 +266,18 @@ def add_internal_note(request, ticket_id):
             )
 
     return redirect("ticket_detail", ticket_id=ticket.id)
+
+@role_required("regular_user")
+def reopen_ticket(request, ticket_id):
+    ticket = get_object_or_404(Ticket, id=ticket_id)
+
+    if request.user != ticket.submitted_by:
+        raise PermissionDenied
+
+    if request.method == "POST" and ticket.status == "Closed":
+        ticket.reopen_ticket(request.user)
+
+    return redirect(
+        "ticket_detail",
+        ticket_id=ticket.id
+    )

@@ -3,6 +3,16 @@
 <h1>Ticket #{{ ticket.id }}</h1>
 <h2>{{ ticket.title }}</h2>
 <p>Status: {{ ticket.status }}</p>
+
+{% if user == ticket.submitted_by and ticket.status == "Closed" %}
+    <form method="post"
+        action="{% url 'reopen_ticket' ticket.id %}">
+        {% csrf_token %}
+
+        <button type="submit">Reopen Ticket</button>
+    </form>
+{% endif %}
+
 <p>Priority: {{ ticket.priority }}</p>
 <p>Category: {{ ticket.category }}</p>
 <p>Department: {{ ticket.department }}</p>

@@ -1,9 +1,29 @@
 {% extends 'base.html' %}
 {% block content %}
+
+<style>
+    .ticket-table {
+        border-collapse: collapse;
+        width: 100%;
+    }
+
+    .ticket-table th,
+    .ticket-table td {
+        border: 1px solid #999;
+        padding: 8px 12px;
+        text-align: left;
+        vertical-align: top;
+    }
+
+    .ticket-table th {
+        font-weight: bold;
+    }
+</style>
+
     <h1>My Tickets</h1>
 
         {% if tickets %}
-          <table>
+          <table class="ticket-table">
             <thead>
                 <tr>
                   <th>Ticket #</th>
