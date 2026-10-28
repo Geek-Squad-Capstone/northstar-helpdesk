@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
-from .models import Ticket, UserProfile, Category, InternalNote 
+from .models import Ticket, UserProfile, Category, InternalNote, User 
 from .permissions import PermissionDenied, role_required
 from .forms import TicketForm, CategoryForm, CommentForm
 from django.contrib import messages
@@ -48,10 +48,53 @@ def ticket_queue(request):
         status="Closed"
     ).order_by("-created_date")
 
+    status = request.GET.get("status")
+    if status:
+        tickets = tickets.filter(status=status)
+
+    department = request.GET.get("department")
+    if department:
+        tickets = tickets.filter(department=department)
+
+    category = request.GET.get("category")
+    if category:
+        tickets = tickets.filter(category_id=category)
+
+    assignment = request.GET.get("assignment")
+    if assignment == "unassigned":
+        tickets = tickets.filter(assigned_technician__isnull=True)
+    elif assignment == "assigned":
+        tickets = tickets.filter(assigned_technician__isnull=False)
+
+    submitted_by = request.GET.get("submitted_by")
+    if submitted_by:
+        tickets = tickets.filter(submitted_by_id=submitted_by)
+
+    ticket_number = request.GET.get("ticket_number")
+    if ticket_number:
+        tickets = tickets.filter(id=ticket_number)
+
+    assigned_technician = request.GET.get("assigned_technician")
+    if assigned_technician:
+        tickets = tickets.filter(assigned_technician_id=assigned_technician)
+
+    departments = Ticket.department_choices
+    categories = Category.objects.all().order_by("category_name")
+    submitters = User.objects.all().order_by("username")
+    technicians = User.objects.filter(
+        profile__role="technician"
+        ).order_by("username")
+
     return render(
         request,
         "ticket_queue.html",
-        {"tickets": tickets}
+        {
+            "tickets": tickets,
+            "departments": departments,
+            "categories": categories,
+            "submitters": submitters,
+            "technicians": technicians
+        }
     )
 
 @login_required
@@ -191,7 +234,6 @@ def category_management(request):
             "categories": categories,
         }
     )
-
 
 @role_required("administrator")
 def toggle_category_status(request, category_id):

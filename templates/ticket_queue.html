@@ -40,6 +40,112 @@
 
 <h1>Ticket Queue</h1>
 
+<form method="get">
+    <label for="status">Status:</label>
+
+    <select name="status" id="status">
+        <option value="">All</option>
+
+        <option value="Open"
+            {% if request.GET.status == "Open" %}selected{% endif %}>
+            Open
+        </option>
+
+        <option value="In Progress"
+            {% if request.GET.status == "In Progress" %}selected{% endif %}>
+            In Progress
+        </option>
+
+        <option value="Resolved"
+            {% if request.GET.status == "Resolved" %}selected{% endif %}>
+            Resolved
+        </option>
+    </select>
+
+    <label for="department">Department:</label>
+
+    <select name="department" id="department">
+        <option value="">All</option>
+
+        {% for value, label in departments %}
+            <option value="{{ value }}"
+                {% if request.GET.department == value %}selected{% endif %}>
+                {{ label }}
+            </option>
+        {% endfor %}
+
+    </select>
+
+    <label for="category">Category:</label>
+
+    <select name="category" id="category">
+        <option value="">All</option>
+
+        {% for category in categories %}
+            <option value="{{ category.id }}"
+                {% if request.GET.category == category.id|stringformat:"s" %}selected{% endif %}>
+                {{ category.category_name }}
+            </option>
+        {% endfor %}
+    </select>
+
+    <label for="assignment">Assignment:</label>
+
+    <select name="assignment" id="assignment">
+        <option value="">All</option>
+
+        <option value="assigned"
+            {% if request.GET.assignment == "assigned" %}selected{% endif %}>
+            Assigned
+        </option>
+
+        <option value="unassigned"
+            {% if request.GET.assignment == "unassigned" %}selected{% endif %}>
+            Unassigned
+        </option>
+    </select>
+
+    <label for="submitted_by">Submitted By:</label>
+
+    <select name="submitted_by" id="submitted_by">
+        <option value="">All</option>
+
+        {% for user_option in submitters %}
+            <option value="{{ user_option.id }}"
+                {% if request.GET.submitted_by == user_option.id|stringformat:"s" %}selected{% endif %}>
+                {{ user_option.username }}
+            </option>
+        {% endfor %}
+    </select>
+
+    <label for="ticket_number">Ticket #:</label>
+
+    <input
+        type="number"
+        name="ticket_number"
+        id="ticket_number"
+        min="1"
+        value="{{ request.GET.ticket_number }}"
+    >
+
+    <label for="assigned_technician">Assigned Technician:</label>
+
+    <select name="assigned_technician" id="assigned_technician">
+        <option value="">All</option>
+
+        {% for technician in technicians %}
+            <option value="{{ technician.id }}"
+                {% if request.GET.assigned_technician == technician.id|stringformat:"s" %}selected{% endif %}>
+                {{ technician.username }}
+            </option>
+        {% endfor %}
+    </select>
+
+
+    <button type="submit">Filter</button>
+    <a href="{% url 'ticket_queue' %}">Clear Filters</a>
+</form>
+
 <table class="ticket-table">
     <thead>
         <tr>
