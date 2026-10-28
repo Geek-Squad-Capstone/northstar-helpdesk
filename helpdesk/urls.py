@@ -118,4 +118,10 @@ urlpatterns = [
         views.reopen_ticket,
         name="reopen_ticket"
     ),
+
+    path(
+        "ticket/history/",
+        views.closed_ticket_history,
+        name="closed_ticket_history"
+    ),
 ]

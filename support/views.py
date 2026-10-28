@@ -83,11 +83,62 @@ def ticket_queue(request):
     submitters = User.objects.all().order_by("username")
     technicians = User.objects.filter(
         profile__role="technician"
-        ).order_by("username")
+    ).order_by("username")
 
     return render(
         request,
         "ticket_queue.html",
+        {
+            "tickets": tickets,
+            "departments": departments,
+            "categories": categories,
+            "submitters": submitters,
+            "technicians": technicians
+        }
+    )
+
+@role_required("technician", "administrator")
+def closed_ticket_history(request):
+    tickets = Ticket.objects.filter(
+        status="Closed"
+    ).order_by("-closed_date")
+
+    department = request.GET.get("department")
+    if department:
+        tickets = tickets.filter(department=department)
+
+    category = request.GET.get("category")
+    if category:
+        tickets = tickets.filter(category_id=category)
+
+    assignment = request.GET.get("assignment")
+    if assignment == "unassigned":
+        tickets = tickets.filter(assigned_technician__isnull=True)
+    elif assignment == "assigned":
+        tickets = tickets.filter(assigned_technician__isnull=False)
+
+    submitted_by = request.GET.get("submitted_by")
+    if submitted_by:
+        tickets = tickets.filter(submitted_by_id=submitted_by)
+
+    ticket_number = request.GET.get("ticket_number")
+    if ticket_number:
+        tickets = tickets.filter(id=ticket_number)
+
+    assigned_technician = request.GET.get("assigned_technician")
+    if assigned_technician:
+        tickets = tickets.filter(assigned_technician_id=assigned_technician)
+
+    departments = Ticket.department_choices
+    categories = Category.objects.all().order_by("category_name")
+    submitters = User.objects.all().order_by("username")
+    technicians = User.objects.filter(
+        profile__role="technician"
+    ).order_by("username")
+
+    return render(
+        request,
+        "closed_ticket_history.html",
         {
             "tickets": tickets,
             "departments": departments,
