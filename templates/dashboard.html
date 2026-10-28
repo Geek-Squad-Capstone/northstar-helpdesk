@@ -3,8 +3,8 @@
     <h1>Dashboard</h1>
     <p>Helpdesk Dashboard</p>
 
-    <a href="{% url 'create_ticket' %}" class="btn btn-primary">
-        Create Ticket
-    </a>
+    {% if user.profile.role == "regular_user" or user.profile.role == "administrator" %}
+        <a href="{% url 'create_ticket' %}">Create Ticket</a>
+    {% endif %}
 
 {% endblock %}

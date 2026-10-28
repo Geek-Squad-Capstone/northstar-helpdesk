@@ -1476,4 +1476,89 @@ class UserManagementTests(TestCase):
             reverse("user_management")
         )
 
-        self.assertEqual(response.status_code, 403)    
+        self.assertEqual(response.status_code, 403)
+
+class CreateTicketAccessTests(TestCase):
+    def setUp(self):
+        self.admin = User.objects.create_user(
+            username='test_admin',
+            password='testpass123'
+        )
+
+        UserProfile.objects.create(
+            user=self.admin,
+            role='administrator'
+        )
+
+        self.technician = User.objects.create_user(
+            username='test_technician',
+            password='testpass123'
+        )
+
+        UserProfile.objects.create(
+            user=self.technician,
+            role='technician'
+        )
+
+        self.regular_user = User.objects.create_user(
+            username='test_user',
+            password='testpass123'
+        )
+
+        UserProfile.objects.create(
+            user=self.regular_user,
+            role='regular_user'
+        )
+
+    def test_regular_user_can_access_create_ticket(self):
+        self.client.login(
+            username = 'test_user',
+            password = 'testpass123'
+        )
+
+        response = self.client.get(
+            reverse("create_ticket")
+        )
+
+        self.assertEqual(response.status_code, 200)        
+
+    def test_administrator_can_access_create_ticket(self):
+        self.client.login(
+            username = 'test_admin',
+            password = 'testpass123'
+        )
+
+        response = self.client.get(
+            reverse("create_ticket")
+        )
+
+        self.assertEqual(response.status_code, 200) 
+
+    def test_technician_cannot_access_create_ticket(self):
+        self.client.login(
+            username = 'test_technician',
+            password = 'testpass123'
+        )
+
+        response = self.client.get(
+            reverse("create_ticket")
+        )
+
+        self.assertEqual(response.status_code, 403)
+
+    def test_technician_dashboard_does_not_show_create_ticket_link(self):
+        self.client.login(
+            username='test_technician',
+            password='testpass123'
+        )
+
+        response = self.client.get(
+            reverse("dashboard")
+        )
+
+        self.assertEqual(response.status_code, 200)
+
+        self.assertNotContains(
+            response,
+            reverse("create_ticket")
+        )             
