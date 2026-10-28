@@ -1,6 +1,7 @@
 from django.test import TestCase
 from django.contrib.auth.models import User
 from django.urls import reverse
+from django.utils import timezone
 
 from .models import UserProfile, Category, Ticket, AuditLog, Comment, InternalNote
 
@@ -1213,3 +1214,128 @@ class TicketQueueFilterTests(TestCase):
         self.assertIn(self.ticket_a, tickets)
         self.assertNotIn(self.ticket_c, tickets)
         self.assertNotIn(self.ticket_b, tickets)
+
+class ClosedTicketHistoryTests(TestCase):
+    def setUp(self):
+        self.technician = User.objects.create_user(
+            username='history_technician',
+            password='testpass123'
+        )
+
+        UserProfile.objects.create(
+            user=self.technician,
+            role='technician'
+        )
+
+        self.admin = User.objects.create_user(
+            username='history_admin',
+            password='testpass123'
+        )
+
+        UserProfile.objects.create(
+            user=self.admin,
+            role='administrator'
+        )
+
+        self.regular_user = User.objects.create_user(
+            username='history_user',
+            password='testpass123'
+        )
+
+        UserProfile.objects.create(
+            user=self.regular_user,
+            role='regular_user'
+        )
+
+        self.category = Category.objects.create(
+            category_name='Hardware'
+        )
+
+        self.ticket_o = Ticket.objects.create(
+            status = "Open",
+            submitted_by=self.regular_user,
+            category=self.category,
+            title='Open History Test',
+            department='Finance',
+            assigned_technician = self.technician
+        )
+
+        self.ticket_c = Ticket.objects.create(
+            status = "Closed",
+            closed_date=timezone.now(),
+            submitted_by=self.regular_user,
+            category=self.category,
+            title='Closed History Test',
+            department='IT',
+            assigned_technician = self.technician
+        )
+
+    def test_technician_can_view_closed_ticket_history(self):
+        self.client.login(
+            username='history_technician',
+            password='testpass123'
+        )
+
+        response = self.client.get(
+            reverse("closed_ticket_history")
+        )
+
+        self.assertEqual(response.status_code, 200)
+
+    def test_administrator_can_view_closed_ticket_history(self):
+        self.client.login(
+            username='history_admin',
+            password='testpass123'
+        )
+
+        response = self.client.get(
+            reverse("closed_ticket_history")
+        )
+
+        self.assertEqual(response.status_code, 200)
+
+    def test_regular_user_cannot_view_closed_ticket_history(self):
+        self.client.login(
+            username='history_user',
+            password='testpass123'
+        )
+
+        response = self.client.get(
+            reverse("closed_ticket_history")
+        )
+
+        self.assertEqual(response.status_code, 403)
+
+    def test_closed_ticket_history_only_shows_closed_tickets(self):
+        self.client.login(
+            username='history_technician',
+            password='testpass123'
+        )
+
+        response = self.client.get(
+            reverse("closed_ticket_history")
+        )
+
+        tickets = response.context["tickets"]
+
+        self.assertIn(self.ticket_c, tickets)
+        self.assertNotIn(self.ticket_o, tickets)
+
+    def test_closed_ticket_history_filters_by_ticket_number(self):
+        self.client.login(
+            username='history_technician',
+            password='testpass123'
+        )
+
+        response = self.client.get(
+            reverse("closed_ticket_history"),
+            {"ticket_number": self.ticket_c.id}
+        )
+
+        self.assertEqual(response.status_code, 200)
+
+        tickets = response.context["tickets"]
+
+        self.assertIn(self.ticket_c, tickets)
+        self.assertNotIn(self.ticket_o, tickets)
+

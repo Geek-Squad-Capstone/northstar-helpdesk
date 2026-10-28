@@ -22,6 +22,14 @@
                     <li><a href="{% url 'ticket_queue' %}">Ticket Queue</a></li>
                 {% endif %}
 
+                {% if user.profile.role == "technician" or user.profile.role == "administrator" %}
+                    <li>
+                        <a href="{% url 'closed_ticket_history' %}">
+                            Closed Ticket History
+                        </a>
+                    </li>
+                {% endif %}
+
                 {% if user.profile.role == "administrator" %}
                     <li><a href="{% url 'category_management' %}">Category Management</a></li>
                 {% endif %}
