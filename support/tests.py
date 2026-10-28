@@ -951,3 +951,87 @@ class TicketDetailTests(TestCase):
         self.assertIsNotNone(
             self.ticket.closed_date
         )
+
+    def test_ticket_owner_can_reopen_closed_ticket(self):
+        self.ticket.status = "Closed"
+        self.ticket.save()
+
+        self.client.login(
+            username='detail_owner',
+            password='testpass123'
+        )
+
+        response = self.client.post(
+            reverse('reopen_ticket', args=[self.ticket.id])
+        )
+
+        self.assertEqual(response.status_code, 302)
+
+        self.ticket.refresh_from_db()
+
+        self.assertEqual(
+            self.ticket.status,
+            "Open"
+            )
+
+        self.assertTrue(
+            AuditLog.objects.filter(
+                ticket=self.ticket,
+                action="Ticket reopened"
+            ).exists()
+        )
+
+    def test_non_owner_cannot_reopen_ticket(self):
+        self.ticket.status = "Closed"
+        self.ticket.save()
+
+        self.client.login(
+            username='detail_other',
+            password='testpass123'
+        )
+
+        response = self.client.post(
+            reverse('reopen_ticket', args=[self.ticket.id])
+        )
+
+        self.assertEqual(response.status_code, 403)
+
+        self.ticket.refresh_from_db()
+
+        self.assertEqual(
+            self.ticket.status,
+            "Closed"
+        )
+
+        self.assertFalse(
+            AuditLog.objects.filter(
+                ticket=self.ticket,
+                action="Ticket reopened"
+            ).exists()
+        )
+
+    def test_open_ticket_cannot_be_reopened(self):
+        self.client.login(
+            username='detail_owner',
+            password='testpass123'
+        )
+
+        response = self.client.post(
+            reverse('reopen_ticket', args=[self.ticket.id])
+        )
+
+        self.assertEqual(response.status_code, 302)
+
+        self.ticket.refresh_from_db()
+
+        self.assertEqual(
+            self.ticket.status,
+            "Open"
+        )
+
+        self.assertFalse(
+            AuditLog.objects.filter(
+                ticket=self.ticket,
+                action="Ticket reopened"
+            ).exists()
+        )

@@ -164,6 +164,16 @@ class Ticket(models.Model):
             action=f"Ticket closed"
         )
 
+    def reopen_ticket(self, user):
+        self.status = "Open"
+        self.save()
+
+        AuditLog.objects.create(
+            user=user,
+            ticket=self,
+            action="Ticket reopened"
+        )
+
     def __str__(self):
         return self.title
 

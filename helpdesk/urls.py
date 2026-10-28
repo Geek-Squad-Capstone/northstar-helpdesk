@@ -112,4 +112,10 @@ urlpatterns = [
         views.add_internal_note,
         name="add_internal_note"
     ),
+
+    path(
+        "ticket/<int:ticket_id>/reopen_ticket/",
+        views.reopen_ticket,
+        name="reopen_ticket"
+    ),
 ]
