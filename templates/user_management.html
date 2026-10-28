@@ -1,0 +1,121 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<style>
+    .management-table {
+        border-collapse: collapse;
+        width: 100%;
+    }
+
+    .management-table th,
+    .management-table td {
+        border: 1px solid #999;
+        padding: 8px 12px;
+        text-align: left;
+        vertical-align: middle;
+    }
+
+    .management-table th {
+        font-weight: bold;
+    }
+
+    .management-table form {
+        display: inline-block;
+        margin: 0;
+    }
+</style>
+
+<h1>User Management</h1>
+
+<h2>Create User</h2>
+
+<form method="post">
+    {% csrf_token %}
+
+    {{ form.as_p }}
+
+    <button type="submit">Create User</button>
+</form>
+
+<h2>Existing Users</h2>
+
+<table class="management-table">
+    <thead>
+        <tr>
+            <th>Username</th>
+            <th>Role</th>
+            <th>Status</th>
+            <th>Change Role</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        {% for account in users %}
+            <tr>
+                <td>{{ account.username }}</td>
+
+                <td>
+                    {{ account.profile.get_role_display }}
+                </td>
+
+                <td>
+                    {% if account.is_active %}
+                        Active
+                    {% else %}
+                        Inactive
+                    {% endif %}
+                </td>
+
+                <td>
+                    {% if account == user %}
+                        Current Role
+                    {% else %}
+                        <form method="post"
+                              action="{% url 'change_user_role' account.id %}">
+                            {% csrf_token %}
+
+                            <select name="role">
+                                {% for value, label in role_options %}
+                                    <option value="{{ value }}"
+                                        {% if account.profile.role == value %}selected{% endif %}>
+                                        {{ label }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+
+                            <button type="submit">Change Role</button>
+                        </form>
+                    {% endif %}
+                </td>
+
+                <td>
+                    {% if account == user %}
+                        Current User
+
+                    {% elif account.is_active %}
+                        <form method="post"
+                              action="{% url 'deactivate_user' account.id %}">
+                            {% csrf_token %}
+
+                            <button type="submit">Deactivate</button>
+                        </form>
+
+                    {% else %}
+                        Inactive
+                    {% endif %}
+                </td>
+            </tr>
+
+        {% empty %}
+            <tr>
+                <td colspan="5">
+                    No users found.
+                </td>
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+{% endblock %}

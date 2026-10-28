@@ -1339,3 +1339,141 @@ class ClosedTicketHistoryTests(TestCase):
         self.assertIn(self.ticket_c, tickets)
         self.assertNotIn(self.ticket_o, tickets)
 
+class UserManagementTests(TestCase):
+    def setUp(self):
+        self.admin = User.objects.create_user(
+            username='manager_admin',
+            password='testpass123'
+        )
+
+        UserProfile.objects.create(
+            user=self.admin,
+            role='administrator'
+        )
+
+        self.target_user = User.objects.create_user(
+            username='managed_user',
+            password='testpass123'
+        )
+
+        UserProfile.objects.create(
+            user=self.target_user,
+            role='regular_user'
+        )
+
+    def test_admin_can_create_user_with_selected_role(self):
+        self.client.login(
+            username='manager_admin',
+            password='testpass123'
+        )
+
+        response = self.client.post(
+            reverse("user_management"),
+            {
+                "username": "sasquatch",
+                "role": "technician",
+                "password1": "daffeyDuck143",
+                "password2": "daffeyDuck143"
+            }
+        )
+
+        self.assertEqual(response.status_code, 302)
+
+        new_user = User.objects.get(username="sasquatch")
+
+        self.assertEqual(
+            new_user.profile.role,
+            "technician"
+        )
+
+    def test_admin_can_change_user_role(self):
+        self.client.login(
+            username='manager_admin',
+            password='testpass123'
+        )
+
+        response = self.client.post(
+            reverse("change_user_role", args=[self.target_user.id]),
+            {
+                "role": "technician"
+            }
+        )
+
+        self.assertEqual(response.status_code, 302)
+
+        self.target_user.profile.refresh_from_db()
+
+        self.assertEqual(
+            self.target_user.profile.role,
+            "technician"
+        )
+
+    def test_admin_can_deactivate_user(self):
+        self.client.login(
+            username='manager_admin',
+            password='testpass123'
+        )
+
+        response = self.client.post(
+            reverse("deactivate_user", args=[self.target_user.id])
+        )
+
+        self.assertEqual(response.status_code, 302)
+
+        self.target_user.refresh_from_db()
+
+        self.assertFalse(
+            self.target_user.is_active
+        )
+
+    def test_admin_cannot_deactivate_themselves(self):
+        self.client.login(
+            username='manager_admin',
+            password='testpass123'
+        )
+
+        response = self.client.post(
+            reverse("deactivate_user", args=[self.admin.id])
+        )
+
+        self.assertEqual(response.status_code, 403)
+
+        self.admin.refresh_from_db()
+
+        self.assertTrue(
+            self.admin.is_active
+        )        
+
+    def test_admin_cannot_change_their_own_role(self):
+        self.client.login(
+            username='manager_admin',
+            password='testpass123'
+        )
+
+        response = self.client.post(
+            reverse("change_user_role", args=[self.admin.id]),
+            {
+                "role": "regular_user"
+            }
+        )
+
+        self.assertEqual(response.status_code, 403)
+
+        self.admin.profile.refresh_from_db()
+
+        self.assertEqual(
+            self.admin.profile.role,
+            "administrator"
+        )
+
+    def test_regular_user_cannot_access_user_management(self):
+        self.client.login(
+            username = 'managed_user',
+            password = 'testpass123'
+        )
+
+        response = self.client.get(
+            reverse("user_management")
+        )
+
+        self.assertEqual(response.status_code, 403)    

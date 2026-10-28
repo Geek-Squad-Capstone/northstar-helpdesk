@@ -2,7 +2,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from .models import Ticket, UserProfile, Category, InternalNote, User 
 from .permissions import PermissionDenied, role_required
-from .forms import TicketForm, CategoryForm, CommentForm
+from .forms import TicketForm, CategoryForm, CommentForm, AdminUserCreationForm
 from django.contrib import messages
 
 
@@ -374,3 +374,57 @@ def reopen_ticket(request, ticket_id):
         "ticket_detail",
         ticket_id=ticket.id
     )
+
+@role_required("administrator")
+def user_management(request):
+    if request.method == "POST":
+        form = AdminUserCreationForm(request.POST)
+
+        if form.is_valid():
+            form.save()
+            return redirect("user_management")
+    else:
+        form = AdminUserCreationForm()
+
+    users = User.objects.select_related("profile").order_by("username")
+
+    return render(
+        request,
+        "user_management.html",
+        {
+            "form": form,
+            "users": users,
+            "role_options": UserProfile.role_options
+        }
+    )
+
+@role_required("administrator")
+def change_user_role(request, user_id):
+    target_user = get_object_or_404(User, id=user_id)
+
+    if target_user == request.user:
+        raise PermissionDenied
+
+    if request.method == "POST":
+        role = request.POST.get("role")
+
+        valid_roles = [value for value, label in UserProfile.role_options]
+
+        if role in valid_roles:
+            target_user.profile.role = role
+            target_user.profile.save()
+    
+    return redirect("user_management")
+
+@role_required("administrator")
+def deactivate_user(request, user_id):
+    target_user = get_object_or_404(User, id=user_id)
+
+    if target_user == request.user:
+        raise PermissionDenied
+
+    if request.method == "POST":
+        target_user.is_active = False
+        target_user.save()
+
+    return redirect("user_management")
