@@ -14,7 +14,7 @@ def index(request):
 def dashboard(request):
     return render(request, 'dashboard.html')
 
-@login_required
+@role_required("regular_user", "administrator")
 def create_ticket(request):
     if request.method == "POST":
         form = TicketForm(request.POST)
