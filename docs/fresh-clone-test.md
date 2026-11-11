@@ -94,7 +94,7 @@ Added test categories through Django Admin.
 
 Verified that the Category dropdown worked and tickets could be created.
 
-Fixing Commit: Pending.
+Fixing Commit: Included in this pull request.
 
 6. User Management Menu Was Missing
 
