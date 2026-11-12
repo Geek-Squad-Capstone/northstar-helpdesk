@@ -185,3 +185,7 @@ The fresh clone was successfully installed, and the main ticket management workf
 However, the Setup Guide needs additional Windows PowerShell instructions, and the missing User Management menu and automatic `UserProfile` creation require further investigation.
 
 A final independent retest should be performed after the documentation and application fixes are completed.
+
+## Fixes Made
+
+1. **Setup-guide corrections:** Added PowerShell activation and troubleshooting instructions, and replaced `createsuperuser` with the creation of a standard Django user and a NorthStar administrator `UserProfile`. [View fixing commit](https://github.com/Geek-Squad-Capstone/northstar-helpdesk/commit/2e3e6ff6aa01216562259d02e6faa98a75bffcf5).
