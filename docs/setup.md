@@ -44,18 +44,11 @@ python3 -m venv setup
 
 5. Activate the `setup` virtual environment.
 
-For Windows with Git Bash:
+For Windows PowerShell:
 
-```bash
-source setup/Scripts/activate
+```powershell
+.\setup\Scripts\Activate.ps1
 ```
-
-For Windows Command Prompt:
-
-```bash
-setup\Scripts\activate
-```
-
 For macOS or Linux:
 
 ```bash
@@ -102,14 +95,42 @@ python manage.py migrate
 
 The migrations should complete without errors.
 
-10.Create a local administrator account for testing.
+10. Create the initial NorthStar administrator
+
+NorthStar requires an initial administrator account before additional users can be created through the web interface.
+
+Open the Django shell:
 
 ```bash
-python manage.py createsuperuser
+python manage.py shell
 ```
 
-Follow the prompts to create a username and password. 
+10.1 Enter the following Python commands:
 
+```python
+from django.contrib.auth.models import User
+from django.contrib.auth.password_validation import validate_password
+from support.models import UserProfile
+from getpass import getpass
+
+username = input("Administrator username: ").strip()
+password = getpass("Administrator password: ")
+
+validate_password(password)
+
+user = User.objects.create_user(
+    username=username,
+    password=password
+)
+
+UserProfile.objects.create(
+    user=user,
+    role="administrator"
+)
+
+print("NorthStar administrator created successfully.")
+exit()
+```
 
 11. Start the Django development server.
 
@@ -122,14 +143,19 @@ After starting the development server, open the following address in a web brows
 http://127.0.0.1:8000/
 ```
 
-12. Sign in with the administrator account and open `User Management`.
+12. Log in to NorthStar
 
-Create two local test users:
+Select **Login** and enter the username and password created in Step 10.
 
-- One user with the `IT Technician` role
-- One user with the `Regular User` role
+Once logged in, the administrator should have access to **User Management** and **Category Management**.
 
-Use test-only usernames and passwords. Do not commit passwords or other secrets to the repository.
+Use **User Management** to create additional accounts with the appropriate roles:
+
+- IT Administrator
+- IT Technician
+- Regular User
+
+Use **Category Management** to add at least one ticket category before testing ticket submissions.
 
 ## Verify It Works
 
@@ -201,10 +227,10 @@ For macOS or Linux:
 source setup/bin/activate
 ```
 
-For Windows with Git Bash:
+For Windows PowerShell:
 
-```bash
-source setup/Scripts/activate
+```powershell
+.\setup\Scripts\Activate.ps1
 ```
 
 Then install the dependencies again:
@@ -219,4 +245,18 @@ If Django reports missing or unapplied migrations, run:
 
 ```bash
 python manage.py migrate
+```
+
+### PowerShell Blocks Virtual Environment Activation
+
+If PowerShell blocks the `Activate.ps1` script because of the execution policy, run:
+
+```powershell
+Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
+```
+
+Then activate the virtual environment again:
+
+```powershell
+.\setup\Scripts\Activate.ps1
 ```
