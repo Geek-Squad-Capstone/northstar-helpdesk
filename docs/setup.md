@@ -97,40 +97,16 @@ The migrations should complete without errors.
 
 10. Create the initial NorthStar administrator
 
-NorthStar requires an initial administrator account before additional users can be created through the web interface.
-
-Open the Django shell:
+After applying the database migrations, run:
 
 ```bash
-python manage.py shell
+python manage.py bootstrap_admin
 ```
+Enter a username, password, and password confirmation when prompted.
 
-10.1 Enter the following Python commands:
+The command creates a standard user with NorthStar's administrator role. It does not create a Django superuser.
 
-```python
-from django.contrib.auth.models import User
-from django.contrib.auth.password_validation import validate_password
-from support.models import UserProfile
-from getpass import getpass
-
-username = input("Administrator username: ").strip()
-password = getpass("Administrator password: ")
-
-validate_password(password)
-
-user = User.objects.create_user(
-    username=username,
-    password=password
-)
-
-UserProfile.objects.create(
-    user=user,
-    role="administrator"
-)
-
-print("NorthStar administrator created successfully.")
-exit()
-```
+Once complete, start the development server and log in through the NorthStar web interface using these credentials.
 
 11. Start the Django development server.
 
